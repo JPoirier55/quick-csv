@@ -1,0 +1,16 @@
+dag,standardized,note,PR
+pg_loader_gold_persistent_main_emr,n/a,,
+pg_loader_affiliate_silver,no,not using PGLoaderDAG class,https://github.com/StashInvest/stash-airflow/compare/DE-2182...DE-2182-first-set
+pg_loader_beacon,no,lots wrong,https://github.com/StashInvest/stash-airflow/compare/DE-2182...DE-2182-first-set
+pg_loader_bookie,no,same as beacon,https://github.com/StashInvest/stash-airflow/compare/DE-2182...DE-2182-first-set
+pg_loader_main_gold,no,May not be able to standardize,
+pg_loader_main_silver,no,May not be able to standardize,
+pg_loader_orca,no,May not be able to standardize,
+pg_loader_plastic_gold,no,May not be able to standardize,
+pg_loader_sauron_search,no,,
+pg_loader_stockparty,no,,
+pg_loader_stockton,no,,
+pg_loader_usher,no,"seems wonky, lot of reused stuff",
+pg_rover_service_loader,no,,
+pg_loader_start_of_days,not really,not going to touch it,
+pg_loader_ale,yes,,
