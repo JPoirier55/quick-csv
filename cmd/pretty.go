@@ -20,9 +20,8 @@ import (
 	"fmt"
 	"encoding/csv"
 	"io"
-	"log"
 	"os"
-	"text/tabwriter"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -38,59 +37,72 @@ var prettyCmd = &cobra.Command{
 	Use:   "pretty",
 	Short: "Pretty print csv",
 	Long: `Pretty printin, spendin gs`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("pretty called")
-		data, err := os.ReadFile(args[0])
-		check(err)
-		r := csv.NewReader(bytes.NewReader(data))
+	Run: runPP,
+}
 
+func runPP(cmd *cobra.Command, args []string) {
+	data, err := os.ReadFile(args[0])
+	check(err)
+	prettyPrint(data)
+}
+
+func sum(array []int) int {
+	result := 0
+	for _, v := range array {
+		result += v
+	}
+	return result
+}
+
+func prettyPrint(data []byte){
+	colWidths, rows := getSizes(data)
+	r := csv.NewReader(bytes.NewReader(data))
+	totalLen := sum(colWidths)
+	rowsShown := 15
+	lineNum := 0
+	fmt.Printf("+%s+\n", strings.Repeat("-", totalLen-2))
+	for {
 		record, err := r.Read()
-		var colLens = make([]int,len(record))
-		for {
-			record, err := r.Read()
-			if err == io.EOF {
-				break
-			}
-			if err != nil {
-				log.Fatal(err)
-			}
-			for i, val := range record {
-				if len(val) > colLens[i] {
-					colLens[i] = len(val)
-				}
-			}
-			fmt.Println(colLens)
+		if err == io.EOF || lineNum > rowsShown {
+			break
 		}
+		check(err)
+		for i, val := range record {
+			fmt.Printf("| %-*s ", colWidths[i]+2, val)
+		}
+		if lineNum == 0 {
+			fmt.Printf("\n+%s+\n", strings.Repeat("-", totalLen-2))
+		} else{
+			fmt.Println()
+		}
+		lineNum++
+	}
+	fmt.Printf("+%s+\n", strings.Repeat("-", totalLen-2))
+	fmt.Printf("%v rows not shown...\n", rows - rowsShown)
+}
 
-		for {
-			record, err := r.Read()
-			if err == io.EOF {
-				break
-			}
-			if err != nil {
-				log.Fatal(err)
-			}
-			w := tabwriter.NewWriter(os.Stdout, 3, 0, 3, ' ', 0)
-			for i, val := range record {
-				if len(val) > colLens[i] {
-					colLens[i] = len(val)
-				}
-			}
-			fmt.Println(colLens)
+func getSizes(data []byte) ([]int, int) {
+	r := csv.NewReader(bytes.NewReader(data))
+	record, err := r.Read()
+	check(err)
+	var colWidths = make([]int,len(record))
+	rows := 0
+	for {
+		record, err := r.Read()
+		if err == io.EOF {
+			break
 		}
-	},
+		check(err)
+		for i, val := range record {
+			if len(val) > colWidths[i] {
+				colWidths[i] = len(val)
+			}
+		}
+		rows++
+	}
+	return colWidths, rows
 }
 
 func init() {
 	rootCmd.AddCommand(prettyCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// prettyCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// prettyCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
